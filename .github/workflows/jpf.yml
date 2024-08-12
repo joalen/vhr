@@ -30,7 +30,7 @@ jobs:
 
     - name: Build project with JDK 17
       if: ${{ runner.os == 'Windows' }}
-      run: cd vhr && mvn clean install -DskipTests
+      run: cd vhr && mvn clean install -DskipTests -pl mailserver
       
     - name: Set up JDK 11 for JPF
       uses: actions/setup-java@v3
