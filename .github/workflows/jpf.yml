@@ -83,6 +83,7 @@ jobs:
       if: runner.os == 'Windows'
       shell: cmd 
       run: | 
+        @echo off
         setlocal enabledelayedexpansion
         
         mkdir jpf_reports
@@ -91,24 +92,31 @@ jobs:
         set "runjpf_jar=C:\path\to\jpf-core\build\RunJPF.jar"
         
         for /r %%i in (*.jar) do (
-            jar tf "%%i" | findstr /i "META-INF\MATINF.MF" >nul 2>&1
+            echo Processing %%i
+            jar tf "%%i" | findstr /i "META-INF\MANIFEST.MF" >nul 2>&1
             if !errorlevel! equ 0 (
                 mkdir META-INF 2>nul
                 jar xf "%%i" META-INF/MANIFEST.MF
-                for /f "tokens=2 delims=: " %%j in ('findstr /i "Main-Class" META-INF/MANIFEST.MF') do (
-                    set "main_class=%%j"
-                    set "main_class=!main_class: =!"
-                    set "main_class=!main_class:"=!%%"
+                if exist META-INF\MANIFEST.MF (
+                    for /f "tokens=2 delims=: " %%j in ('findstr /i "Main-Class" META-INF\MANIFEST.MF') do (
+                        set "main_class=%%j"
+                        set "main_class=!main_class: =!"
+                        set "main_class=!main_class:"=!%%"
         
-                    java -jar "%runjpf_jar%" +classpath="%%i" !main_class! > "jpf_reports\!main_class!_jpf_report.txt"
+                        echo Running java command for !main_class!
+                        java -jar "%runjpf_jar%" +classpath="%%i" !main_class! > "jpf_reports\!main_class!_jpf_report.txt"
+                    )
+                ) else (
+                    echo MANIFEST.MF not found in %%i
                 )
+                rmdir /s /q META-INF
+            ) else (
+                echo META-INF/MANIFEST.MF not found in %%i
             )
         )
         
-        if exist META-INF rmdir /s /q META-INF
-        
         endlocal
-          
+
     - name: Upload JPF reports
       uses: actions/upload-artifact@v4
       with:
