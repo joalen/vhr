@@ -92,26 +92,23 @@ jobs:
         set "runjpf_jar=C:\path\to\jpf-core\build\RunJPF.jar"
         
         for /r %%i in (*.jar) do (
-            echo Processing %%i
-            jar tf "%%i" | findstr /i "META-INF\MANIFEST.MF" >nul 2>&1
-            if !errorlevel! equ 0 (
-                mkdir META-INF 2>nul
-                jar xf "%%i" META-INF/MANIFEST.MF
-                if exist META-INF\MANIFEST.MF (
-                    for /f "tokens=2 delims=: " %%j in ('findstr /i "Main-Class" META-INF\MANIFEST.MF') do (
-                        set "main_class=%%j"
-                        set "main_class=!main_class: =!"
-                        set "main_class=!main_class:"=!%%"
+            echo %%i | findstr /i "SNAPSHOT" >nul 2>&1
+            if !errorlevel! neq 0 (
+                jar tf "%%i" | findstr /i "META-INF\MANIFEST.MF" >nul 2>&1
+                if !errorlevel! equ 0 (
+                    mkdir META-INF 2>nul
+                    jar xf "%%i" META-INF/MANIFEST.MF
+                    if exist META-INF\MANIFEST.MF (
+                        for /f "tokens=2 delims=: " %%j in ('findstr /i "Main-Class" META-INF\MANIFEST.MF') do (
+                            set "main_class=%%j"
+                            set "main_class=!main_class: =!"
+                            set "main_class=!main_class:"=!%%"
         
-                        echo Running java command for !main_class!
-                        java -jar "%runjpf_jar%" +classpath="%%i" !main_class! > "jpf_reports\!main_class!_jpf_report.txt"
+                            java -jar "%runjpf_jar%" +classpath="%%i" !main_class! > "jpf_reports\!main_class!_jpf_report.txt"
+                        )
                     )
-                ) else (
-                    echo MANIFEST.MF not found in %%i
+                    rmdir /s /q META-INF
                 )
-                rmdir /s /q META-INF
-            ) else (
-                echo META-INF/MANIFEST.MF not found in %%i
             )
         )
         
