@@ -30,7 +30,7 @@ jobs:
 
     - name: Build project with JDK 17
       if: ${{ runner.os == 'Windows' }}
-      run: cd vhr && mvn clean install -DskipTests -pl mailserver
+      run: cd vhr && mvn clean install -DskipTests -pl !mailserver
       
     - name: Set up JDK 11 for JPF
       uses: actions/setup-java@v3
@@ -38,21 +38,21 @@ jobs:
         distribution: 'temurin'
         java-version: '11'
 
-    - name: Clone and build jpf-core (Unix-based)
+    - name: Clone and build jpf-core
       if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
       run: |
         git clone https://github.com/javapathfinder/jpf-core.git /tmp/jpf-core
         cd /tmp/jpf-core && git checkout 0916082fac91405e11ec7ce55f9068ce84d61aaa
         ./gradlew buildJars
 
-    - name: Clone and build jpf-core (Windows)
+    - name: Clone and build jpf-core
       if: runner.os == 'Windows'
       run: | 
         git clone https://github.com/javapathfinder/jpf-core.git /tmp/jpf-core
         cd /tmp/jpf-core && git checkout 0916082fac91405e11ec7ce55f9068ce84d61aaa
         ./gradlew.bat buildJars
         
-    - name: Run JPF on JAR files (Unix systems)
+    - name: Run JPF on JAR files
       if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
       shell: bash
       run: |
@@ -79,7 +79,7 @@ jobs:
             $command > "./jpf_reports/${main_class}_jpf_report.txt"
         done
 
-    - name: Run JPF (Windows) 
+    - name: Run JPF on JAR files
       if: runner.os == 'Windows'
       shell: cmd 
       run: | 
