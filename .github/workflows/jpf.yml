@@ -94,7 +94,8 @@ jobs:
         for /r %%i in (*.jar) do (
             jar tf "%%i" | findstr /i "META-INF\MATINF.MF" >nul 2>&1
             if !errorlevel! equ 0 (
-                jar xf "%%i" META-INF/MANIFEST.MF >nul 2>&1
+                mkdir META-INF 2>nul
+                jar xf "%%i" META-INF/MANIFEST.MF
                 for /f "tokens=2 delims=: " %%j in ('findstr /i "Main-Class" META-INF/MANIFEST.MF') do (
                     set "main_class=%%j"
                     set "main_class=!main_class: =!"
