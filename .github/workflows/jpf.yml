@@ -24,9 +24,14 @@ jobs:
         java-version: '17'
         cache: maven
 
-    - name: Build project with JDK 17 (Unix-based)
+    - name: Build project with JDK 17
+      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
       run: cd vhr && mvn clean install -DskipTests -Dmaven.test.skip=true -Dmaven.compiler.test.compile.dependencies=true -Dmaven.compiler.test.classpath=true -Dmaven.test.failure.ignore=true -Dmaven.test.error.ignore=true -Dmaven.test.skip=true -Dmaven.test.skip.exec=true -Dmaven.test.skip.exec=true -Dmaven.test.skip.exec=true
-   
+
+    - name: Build project with JDK 17
+      if: ${{ runner.os == 'Windows' }}
+      run: cd vhr && mvn clean install -DskipTests -Dmaven.compiler.test.compile.dependencies=true -Dmaven.compiler.test.classpath=true -Dmaven.test.failure.ignore=true -Dmaven.test.error.ignore=true -Dmaven.test.skip=true -Dmaven.test.skip.exec=true -Dmaven.test.skip.exec=true -Dmaven.test.skip.exec=true
+      
     - name: Set up JDK 11 for JPF
       uses: actions/setup-java@v3
       with:
